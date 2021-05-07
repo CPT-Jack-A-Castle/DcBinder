@@ -5,10 +5,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Windows.Forms;
+using Toolbelt.Drawing;
 
 namespace DcBinder
 {
@@ -60,10 +62,35 @@ namespace DcBinder
 
         private void button3_Click(object sender, EventArgs e)
         {
-            string pth = ShowDialog("Select an icon", "Icon (*.ico)|*.ico");
+            string pth = ShowDialog("Choose Icon", "Icons Files(*.exe;*.ico;)|*.exe;*.ico");
             if (pth.Length == 0) return;
-            textBox1.Text = pth;
-            pictureBox1.ImageLocation = pth;
+            if (pth.ToLower().EndsWith(".exe"))
+            {
+                string ico = GetIcon(pth);
+                textBox1.Text = ico;
+                pictureBox1.ImageLocation = ico;
+            }
+            else
+            {
+                textBox1.Text = pth;
+                pictureBox1.ImageLocation = pth;
+            }
+
+        }
+
+        private string GetIcon(string path)
+        {
+            try
+            {
+                string tempFile = Path.GetTempFileName() + ".ico";
+                using (FileStream fs = new FileStream(tempFile, FileMode.Create))
+                {
+                    IconExtractor.Extract1stIconTo(path, fs);
+                }
+                return tempFile;
+            }
+            catch { }
+            return "";
         }
 
         private void button6_Click(object sender, EventArgs e)
