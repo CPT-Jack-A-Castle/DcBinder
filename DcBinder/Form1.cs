@@ -4,6 +4,7 @@ using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -231,17 +232,22 @@ namespace DcBinder
 
         private void button4_Click(object sender, EventArgs e)
         {
-            Random rnd = new Random();
-            int num = rnd.Next(1, 20);
-            txtProduct.Text = RandomString(num);
-            num = rnd.Next(1, 20);
-            txtDescription.Text = RandomString(num);
-            num = rnd.Next(1, 20);
-            txtCopyright.Text = RandomString(num);
-            num = rnd.Next(1, 20);
-            txtCompany.Text = RandomString(num);
-            txtProductVersion.Text = rnd.Next(0, 20) + @"." + rnd.Next(0, 20) + @"." + rnd.Next(0, 20) + @"." + rnd.Next(0, 20);
-            txtFileVersion.Text = rnd.Next(0, 20) + @"." + rnd.Next(0, 20) + @"." + rnd.Next(0, 20) + @"." + rnd.Next(0, 20);
+            using (var openFileDialog = new OpenFileDialog())
+            {
+                openFileDialog.Filter = "Executable (*.exe)|*.exe";
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    var fileVersionInfo = FileVersionInfo.GetVersionInfo(openFileDialog.FileName);
+
+                    txtDescription.Text = fileVersionInfo.FileDescription ?? string.Empty;
+                    txtCompany.Text = fileVersionInfo.CompanyName ?? string.Empty;
+                    txtProduct.Text = fileVersionInfo.ProductName ?? string.Empty;
+                    txtCopyright.Text = fileVersionInfo.LegalCopyright ?? string.Empty;
+                    var version = fileVersionInfo.FileMajorPart;
+                    txtFileVersion.Text = $"{fileVersionInfo.FileMajorPart.ToString()}.{fileVersionInfo.FileMinorPart.ToString()}.{fileVersionInfo.FileBuildPart.ToString()}.{fileVersionInfo.FilePrivatePart.ToString()}";
+                    txtProductVersion.Text = $"{fileVersionInfo.FileMajorPart.ToString()}.{fileVersionInfo.FileMinorPart.ToString()}.{fileVersionInfo.FileBuildPart.ToString()}.{fileVersionInfo.FilePrivatePart.ToString()}";
+                }
+            }
         }
 
         private static string RandomString(int size)
